@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'author'
+    'author', #Author application registered in the project.settings file telling django project that author application has created
+    
 ]
 
 MIDDLEWARE = [
