@@ -1,0 +1,32 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+   <h2>List of Authors</h2>
+    <table>
+        <tr>
+            <th>S/N</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Date of birth</th>
+            <th>Year of Death</th>
+            <th colspan="2">Options</th>
+        </tr>
+        {% for author in display_all_author %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{author.first_name}}</td>
+            <td>{{author.last_name}}</td>
+            <td>{{author.dob}}</td>
+
+            {% if author.year_of_death %}
+              <td>{{author.year_of_death}}</td>
+              {% else %}
+              <td>Still Alive</td>
+            {% endif %}
+            <td><a href="">edit</a></td>
+            <td><a href="">delete</a></td>
+            
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
