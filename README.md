@@ -198,3 +198,291 @@ Install packages directly using `uv` and the provided requirements file:
 # Install dependencies from requirement_dev.txt
 uv pip install -r requirement_dev.txt
 ```
+
+## ⚙️ Global Configuration & Setup
+
+### 1. Project Initialization
+```bash
+django-admin startproject library_ms .
+```
+
+### 2. Modular App Structure
+Created app modules to separate concerns across the domain models:
+```bash
+python manage.py startapp author
+python manage.py startapp book_app
+python manage.py startapp genre_app
+```
+
+### 3. Application & Template Registration (`library_ms/settings.py`)
+Configured global template directory searching using `os.path.join(BASE_DIR, "templates")` and registered custom apps in `INSTALLED_APPS`:
+
+```python
+import os
+
+# Application definition
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Custom Apps
+    "author",
+    "book_app",
+    "genre_app",
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+```
+
+---
+
+## 🗄️ Database Models & Admin Registration
+
+### 1. Author Model (`author/models.py`)
+```python
+from django.db import models
+
+
+class Author(models.Model):
+    first_name = models.CharField(max_length=100, null=False, blank=False)
+    last_name = models.CharField(max_length=100, null=False, blank=False)
+    dob = models.DateField(null=True, blank=True)
+    year_of_death = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        death_status = self.year_of_death if self.year_of_death else ""
+        return f"{self.first_name} {self.last_name} {self.dob} {death_status}"
+```
+
+### 2. Custom Admin Class (`author/admin.py`)
+Customized the Django Admin dashboard display layout for `Author` records:
+
+```python
+from django.contrib import admin
+from .models import Author
+
+
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ["id", "first_name", "last_name", "dob", "year_of_death"]
+
+
+admin.site.register(Author, AuthorAdmin)
+```
+
+### 3. Database Migrations & Superuser
+```bash
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+---
+
+## 📝 Forms & Controllers (Views)
+
+### 1. Author ModelForm (`author/forms.py`)
+Used Django's `ModelForm` to generate HTML forms mapped directly to the `Author` schema:
+
+```python
+from django import forms
+from .models import Author
+
+
+class CreateAuthorEntry(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = [
+            "first_name",
+            "last_name",
+            "dob",
+            "year_of_death",
+        ]
+```
+
+### 2. Views Setup (`author/views.py`)
+Implemented views for retrieving author lists and processing form submissions using `POST` request handling and URL redirects:
+
+```python
+from django.shortcuts import render, redirect
+from .models import Author
+from .forms import CreateAuthorEntry
+
+
+def author_view(request):
+    all_author = Author.objects.all().order_by("-id")
+    return render(
+        request,
+        "author/display_author.html",
+        {"display_all_author": all_author},
+    )
+
+
+def author_entry(request):
+    if request.method == "POST":
+        author_form = CreateAuthorEntry(request.POST)
+        if author_form.is_valid():
+            author_form.save()
+            return redirect("display_authors")
+    else:
+        author_form = CreateAuthorEntry()
+
+    context = {"create_form": author_form}
+    return render(request, "author/create_author.html", context)
+```
+
+---
+
+## 🔗 URL Routing Configuration
+
+### 1. App-Level Routing (`author/urls.py`)
+```python
+from django.urls import path
+from .views import author_view, author_entry
+
+urlpatterns = [
+    path("display/", author_view, name="display_authors"),
+    path("create-author/", author_entry, name="create_author"),
+]
+```
+
+### 2. Root Project Routing (`library_ms/urls.py`)
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("author/", include("author.urls")),
+]
+```
+
+---
+
+## 🎨 Templates & Inheritance Architecture
+
+### 1. Master Base Layout (`templates/base/base.html`)
+Provides top-level navigation, document setup, and CSS table styling:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-spacing: 0cap;
+        }
+    </style>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <ul style="list-style: none; display: flex;">
+        <li style="margin-right: 50px;"><a href="{% url 'create_author' %}">Create Author</a></li>
+        <li><a href="{% url 'display_authors' %}">Display Author List</a></li>
+    </ul>
+    {% block content %}
+      
+    {% endblock %}
+</body>
+</html>
+```
+
+### 2. Create Author View (`templates/author/create_author.html`)
+Extends `base/base.html` and renders the ModelForm with `{% csrf_token %}` protection:
+
+```html
+{% extends "base/base.html" %}
+
+{% block content %}
+   <form action="" method="post">
+        {% csrf_token %}
+        {{ create_form.as_p }}
+        <button type="submit">Create</button>
+    </form>
+{% endblock %}
+```
+
+### 3. Display Authors View (`templates/author/display_author.html`)
+Renders author listings dynamically with fallback conditional logic (`Still Alive` vs. `year_of_death` date):
+
+```html
+{% extends "base/base.html" %}
+
+{% block content %}
+   <h2>List of Authors</h2>
+    <table>
+        <tr>
+            <th>S/N</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Date of birth</th>
+            <th>Year of Death</th>
+            <th colspan="2">Options</th>
+        </tr>
+        {% for author in display_all_author %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ author.first_name }}</td>
+            <td>{{ author.last_name }}</td>
+            <td>{{ author.dob }}</td>
+
+            {% if author.year_of_death %}
+              <td>{{ author.year_of_death }}</td>
+            {% else %}
+              <td>Still Alive</td>
+            {% endif %}
+            <td><a href="">edit</a></td>
+            <td><a href="">delete</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+```
+
+---
+
+## 📂 Project Directory Layout
+
+```text
+wtm_library/
+├── .venv/                      # Virtual environment managed by uv
+├── author/                     # Author Domain Module
+│   ├── admin.py                # AuthorAdmin configuration
+│   ├── forms.py                # CreateAuthorEntry ModelForm
+│   ├── models.py               # Author database schema
+│   ├── urls.py                 # App routing rules
+│   └── views.py                # author_view and author_entry handlers
+├── book_app/                   # Books Module
+├── genre_app/                  # Genres Module
+├── library_ms/                 # Core Project Configuration
+│   ├── settings.py             # App registration & template DIRS setup
+│   └── urls.py                 # Root URL dispatcher
+├── templates/                  # Master Templates Folder
+│   ├── base/
+│   │   └── base.html           # Layout shell with navigation
+│   └── author/
+│       ├── create_author.html  # Author creation form template
+│       └── display_author.html # Author list table template
+├── manage.py
+├── pyproject.toml              # uv setup file
+└── requirement_dev.txt         # Frozen development dependencies
+```
