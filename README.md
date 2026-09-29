@@ -201,7 +201,7 @@ uv pip install -r requirement_dev.txt
 
 ## ⚙️ Creating More Applications for the library management system
 
-### 2. Modular App Structure
+### 1. Modular App Structure
 Created app modules to separate concerns across the domain models:
 ```bash
 
@@ -209,7 +209,7 @@ python manage.py startapp book_app
 python manage.py startapp genre_app
 ```
 
-### 3. Application & Template Registration (`library_ms/settings.py`)
+### 2. Application & Template Registration (`library_ms/settings.py`)
 Configured global template directory searching using `os.path.join(BASE_DIR, "templates")` and registered custom apps in `INSTALLED_APPS`:
 
 ```python
