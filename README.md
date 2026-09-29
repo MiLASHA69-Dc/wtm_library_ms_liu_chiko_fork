@@ -199,17 +199,12 @@ Install packages directly using `uv` and the provided requirements file:
 uv pip install -r requirement_dev.txt
 ```
 
-## ⚙️ Global Configuration & Setup
-
-### 1. Project Initialization
-```bash
-django-admin startproject library_ms .
-```
+## ⚙️ Creating More Applications for the library management system
 
 ### 2. Modular App Structure
 Created app modules to separate concerns across the domain models:
 ```bash
-python manage.py startapp author
+
 python manage.py startapp book_app
 python manage.py startapp genre_app
 ```
@@ -267,8 +262,7 @@ class Author(models.Model):
     year_of_death = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        death_status = self.year_of_death if self.year_of_death else ""
-        return f"{self.first_name} {self.last_name} {self.dob} {death_status}"
+        return f"{self.first_name} {self.last_name} {self.dob} {self.year_of_death if self.year_of_death else ''}"
 ```
 
 ### 2. Custom Admin Class (`author/admin.py`)
