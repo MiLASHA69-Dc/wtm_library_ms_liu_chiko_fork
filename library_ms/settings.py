@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "author",  # Author application registered in the project.settings file telling django project that author application has created
     "book_app",
     "genre_app",
+    "import_export",
 ]
 
 MIDDLEWARE = [

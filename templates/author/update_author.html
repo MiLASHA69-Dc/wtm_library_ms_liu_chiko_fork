@@ -1,0 +1,10 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {{update_author.as_p}}
+    <button type="submit">Submit</button>
+    <a href="{% url 'display_authors' %}">Cancel</a>
+  </form>
+{% endblock %}

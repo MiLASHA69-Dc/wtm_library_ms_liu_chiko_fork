@@ -10,3 +10,13 @@ class CreateAuthorEntry(forms.ModelForm):
             "dob",
             "year_of_death",
         ]
+
+class UpdateAuthorEntry(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = [
+            "first_name",
+            "last_name",
+            "dob",
+            "year_of_death",
+        ]

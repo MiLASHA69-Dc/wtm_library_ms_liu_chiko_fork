@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% block content %}
+    <h2>List of Books</h2>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        {{genre_form.as_p}}
+        <button type="submit">Create</button>
+    </form>
+    <p></p>
+    <table>
+        <tr>
+            <th>S/N</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th colspan="2">Options</th>
+        </tr>
+        {% for flavia in display_genres %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{flavia.title}}</td>
+            <td>{{flavia.category}}</td>
+            <td><a href="">edit</a></td>
+            <td><a href="{% url 'genres:delete_genre' flavia.id %}">delete</a></td>
+            
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

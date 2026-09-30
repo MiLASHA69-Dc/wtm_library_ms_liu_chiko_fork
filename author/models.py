@@ -7,5 +7,9 @@ class Author(models.Model):
     dob = models.DateField(null=True,blank=True)
     year_of_death = models.DateField(null=True,blank=True)
 
+    # @property
+    # def age(self):
+    #     self.age=self.year_of_death - self.dob
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} {self.dob} {self.year_of_death if self.year_of_death else ""}"
