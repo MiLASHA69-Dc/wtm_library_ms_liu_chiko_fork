@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<h2>My Profile</h2>
+    <ul>
+        <li>Username: {{user_profile.username}}</li>
+        <li>First Name: {{user_profile.first_name}}</li>
+        <li>Last Name: {{user_profile.last_name}}</li>
+        <li>Email: {{user_profile.email}}</li>
+        <li>Gender: {% if user_profile.userprofile.gender %}
+            {{user_profile.userprofile.gender}}
+            {% endif %}</li>
+        <li>Date of Birth: {% if user_profile.userprofile.dob %}
+            {{user_profile.userprofile.dob}}
+            {% endif %}</li>
+        <li>Country: {% if user_profile.userprofile.country %}
+            {{user_profile.userprofile.country}}
+            {% endif %}</li>
+        <li>Contact: {% if user_profile.userprofile.contact %}
+            {{user_profile.userprofile.contact}}
+            {% endif %} </li>
+        <li>User Type:{% if request.user.is_superuser %}
+            Admin
+            {% elif request.user.is_staff %}
+            Staff
+            {% else %}
+            Active Member
+            {% endif %}
+    </li>
+    </ul>
+{% endblock %}

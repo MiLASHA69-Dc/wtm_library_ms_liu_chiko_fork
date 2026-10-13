@@ -11,30 +11,33 @@ from django.contrib.auth.decorators import login_required
 def author_view(request):
     # return HttpResponse("<h2>This is a registered Author Application</h2> <strong>Yeay our first application in Django under development </strong>")
     all_author = Author.objects.all().order_by("-id")
-    paginate = Paginator(all_author, 10)
+    paginate = Paginator(all_author, 6)
     page_number = request.GET.get("pages")
     page_obj = paginate.get_page(page_number)
-
-    raghad = {
-        "page_obj":page_obj
-    }
-    return render(request,"author/display_author.html",raghad) #{"display_all_author":all_author}
-
-@login_required
-def author_entry(request):
+    author_form = CreateAuthorEntry()
+    
     if request.method == "POST":
         author_form = CreateAuthorEntry(request.POST)
         if author_form.is_valid():
             author_form.save()
             return redirect("display_authors")
 
-    else:
-        author_form = CreateAuthorEntry()
-
-    context ={
+    raghad = {
+        "page_obj":page_obj,
         "create_form":author_form
     }
-    return render(request,"author/create_author.html",context)
+    return render(request,"author/display_author.html",raghad) #{"display_all_author":all_author}
+
+# @login_required
+# def author_entry(request):
+
+#     else:
+#         author_form = CreateAuthorEntry()
+
+#     context ={
+#         "create_form":author_form
+#     }
+#     return render(request,"author/create_author.html",context)
 
 @login_required
 def update_author(request,author_pk):

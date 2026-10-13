@@ -1,0 +1,64 @@
+<!-- Sidebar Navigation -->
+      
+         <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out shadow-xl">
+            <!-- Brand Header -->
+             {% if request.user.is_authenticated %} 
+            <div class="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-slate-800">
+                <a href="index.html" class="flex items-center space-x-3 text-white font-bold text-lg">
+                    <i class="fa-solid fa-book-open-reader text-indigo-500 text-xl"></i>
+                    <span>WTM LMS</span>
+                </a>
+                <button id="sidebar-close" class="md:hidden text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                <a href="{% url 'home:index' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition-colors">
+                    <i class="fa-solid fa-chart-pie w-5"></i><span>Dashboard</span>
+                </a>
+                <a href="{% url 'books_app:display_books' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-book w-5"></i><span>Books Catalog</span>
+                </a>
+                <a href="{% url 'display_authors' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-feather w-5"></i><span>Authors</span>
+                </a>
+                <a href="{% url 'genres:display_genre' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-tags w-5"></i><span>Genres</span>
+                </a>
+                <a href="{% url 'books_app:book_request' %}" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-bookmark w-5"></i><span>Make a Request</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer / Profile -->
+            <div class="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0">
+                        {{request.user.first_name|first}}{{request.user.last_name|first}}
+                    </div>
+                    <div class="truncate">
+                        <p class="text-xs font-semibold text-white truncate">{% if request.user.first_name %}
+                          {{request.user.first_name}} {{request.user.last_name}}
+                        {% else %}
+                        {{request.user.username}}{% endif %}</p>
+                        <p class="text-[10px] text-slate-400 truncate">{% if request.user.is_superuser %}
+                          Admin {% else %} User
+                        {% endif %}</p>
+                    </div>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="text-slate-400 hover:text-rose-400 p-2 transition-colors" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+            {% else %}
+            <div class="p-4 bg-slate-950 border-t border-slate-800">
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{% url 'accounts:login' %}" class="block text-center px-3 py-2 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors">Login</a>
+                    <a href="{% url 'accounts:registration' %}" class="block text-center px-3 py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors">Register</a>
+                </div>
+            </div>
+            {% endif %}
+        </aside>

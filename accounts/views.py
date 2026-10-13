@@ -1,9 +1,19 @@
 from django.shortcuts import render,redirect
 from .forms import RegistrationForm, LoginForm
 from django.contrib.auth import authenticate,login, logout
-
+from django.contrib.auth import get_user_model
+from .models import UserProfile
 # Create your views here.
 
+def userprofile_view(request):
+    User=get_user_model()
+    user = request.user
+    get_user_profile = User.objects.get(id=user.id)
+    context = {
+        "user_profile":get_user_profile
+    }
+
+    return render(request,"auth/userprofile.html",context)
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -29,7 +39,9 @@ def registration_view(request):
     if request.method == "POST":
         registration_form = RegistrationForm(request.POST)
         if registration_form.is_valid():
-            registration_form.save()
+            create_user=registration_form.save()
+            create_user.save()
+            UserProfile.objects.create(user=create_user)
             return redirect("accounts:login")
     else:
         registration_form = RegistrationForm()

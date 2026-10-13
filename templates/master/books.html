@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Books | BiblioTech</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 md:p-10">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Page Header & Action Button -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900">Books Management</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Manage library catalog inventory and records.</p>
+            </div>
+            <button id="open-modal-btn" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add New Book</span>
+            </button>
+        </div>
+
+        <!-- Adaptive Responsive Data Table Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="w-full overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-400 uppercase text-[10px] font-semibold tracking-wider border-b border-slate-200">
+                            <!-- Always visible on all screens -->
+                            <th class="py-3.5 px-6">Book Title</th>
+                            
+                            <!-- Hidden on mobile, shows up on tablets (sm and up) -->
+                            <th class="hidden sm:table-cell py-3.5 px-6">Author</th>
+                            
+                            <!-- Hidden on mobile & tablet, shows up on PC/Desktops (md and up) -->
+                            <th class="hidden md:table-cell py-3.5 px-6">ISBN</th>
+                            
+                            <!-- Always visible -->
+                            <th class="py-3.5 px-6">Status</th>
+                            <th class="py-3.5 px-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <!-- Book Title (Always visible) -->
+                            <td class="py-4 px-6 font-medium text-slate-900">
+                                Harry Potter - The Secret Chamber
+                                <!-- Optional helper subtext on mobile to show author if column is hidden -->
+                                <span class="block sm:hidden text-xs text-slate-400 font-normal mt-0.5">J.K. Rowling</span>
+                            </td>
+                            
+                            <!-- Author (Hidden on mobile, visible on sm+) -->
+                            <td class="hidden sm:table-cell py-4 px-6 text-slate-600">J.K. Rowling</td>
+                            
+                            <!-- ISBN (Hidden on mobile & tablet, visible on md+) -->
+                            <td class="hidden md:table-cell py-4 px-6 text-slate-500 font-mono text-xs">978-0439064873</td>
+                            
+                            <!-- Status (Always visible) -->
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">Available</span>
+                            </td>
+                            
+                            <!-- Actions (Always visible) -->
+                            <td class="py-4 px-6 text-right space-x-2 whitespace-nowrap">
+                                <a href="update_book.html" class="text-slate-400 hover:text-indigo-600 p-1.5 transition-colors inline-block" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <button class="text-slate-400 hover:text-rose-600 p-1.5 transition-colors" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smooth Create Modal -->
+    <div id="create-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs opacity-0 pointer-events-none transition-all duration-300">
+        <div id="modal-container" class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-slate-100 transform scale-95 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900">Add New Book</h3>
+                <button class="close-modal-btn text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Book Title</label>
+                    <input type="text" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">ISBN</label>
+                    <input type="text" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Author</label>
+                    <input type="text" required class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="pt-3 flex space-x-3">
+                    <button type="button" class="close-modal-btn flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-md transition-all">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <!-- Referencing External JS File -->
+    <script>
+        // External Modal Handler for Create / Add Forms
+
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById('create-modal');
+    const modalContainer = document.getElementById('modal-container');
+    const openBtn = document.getElementById('open-modal-btn');
+    const closeBtns = document.querySelectorAll('.close-modal-btn');
+
+    if (!modal) return; // Exit if modal doesn't exist on this page
+
+    // Open Modal with Smooth Transition
+    function openModal() {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContainer.classList.remove('scale-95');
+        modalContainer.classList.add('scale-100');
+    }
+
+    // Close Modal with Smooth Transition
+    function closeModal() {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modalContainer.classList.remove('scale-100');
+        modalContainer.classList.add('scale-95');
+    }
+
+    // Event Listeners
+    if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+    }
+
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+
+    // Close when clicking outside the modal box backdrop
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+});
+</script>
+</body>
+</html>

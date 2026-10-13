@@ -1,0 +1,46 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<h2>Create a Book Request</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        {{form.book.label_tag}}
+        {{form.book}}
+        {{form.book.errors}}
+    </div>
+    <br>
+    <div>
+        {{form.book_date_request.label_tag}}
+        {{form.book_date_request}}
+        {{form.book_date_request.errors}} 
+    </div>
+    <br>
+    <div>
+        {{form.book_date_return.label_tag}}
+        {{form.book_date_return}}
+        {{form.book_date_return.errors}}
+    </div>
+    <button type="submit">Create Request</button>
+</form>
+
+<h2>My Book Request</h2>
+<table>
+    <tr>
+        <th>S/N</th>
+        <th>Book Title</th>
+        <th>Date Borrowed</th>
+        <th>Date to be Returned</th>
+        <th># of borrowed days</th>
+    </tr>
+    {% for request in book_requested %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{ request.book.title }}</td>
+        <td>{{ request.book_date_request }}</td>
+        <td>{{ request.book_date_return }}</td>
+        <td>{{ request.book_date_request|timesince:request.book_date_return }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
