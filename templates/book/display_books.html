@@ -77,27 +77,42 @@
                 </table>
             </div>
         </div>
-    </div>
-    <div>
-        Showing {{display_books.start_index}} to {{display_books.end_index}} of {{display_books.paginator.count}} records
-    </div>
-    <div>
-        {% if display_books.has_previous %}
-          <a href="?franco=1">First</a>
-          <a href="?franco={{display_books.previous_page_number}}">Previous</a>
-          {% endif %}
-    </div>
-    <div>
-            {% for i in display_books.paginator.page_range %}
-                <a href="?franco={{i}}">{{i}}</a>
-            {% endfor %}
-    </div>
-    <div>
-            {% if display_books.has_next %}
-                <a href="?franco={{display_books.next_page_number}}">Next</a>
-                <a href="?franco={{display_books.paginator.num_pages}}">Last</a>
+
+        <!-- Modern Pagination Component Bar -->
+            {% if display_books.paginator.num_pages > 1 %}
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <!-- Record Count Info -->
+                <p class="text-xs text-slate-500">
+                    Showing <span class="font-semibold text-slate-700">{{ display_books.start_index }}</span> to <span class="font-semibold text-slate-700">{{ display_books.end_index }}</span> of <span class="font-semibold text-slate-700">{{ display_books.paginator.count }}</span> records
+                </p>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center space-x-1.5">
+                    {% if display_books.has_previous %}
+                        <a href="?franco=1" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">First</a>
+                        <a href="?franco={{ display_books.previous_page_number }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Previous</a>
+                    {% endif %}
+
+                    <!-- Page Numbers -->
+                    <div class="hidden md:flex items-center space-x-1">
+                        {% for i in display_books.paginator.page_range %}
+                            {% if display_books.number == i %}
+                                <span class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-2xs">{{ i }}</span>
+                            {% elif i > display_books.number|add:'-3' and i < display_books.number|add:'3' %}
+                                <a href="?franco={{ i }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">{{ i }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if display_books.has_next %}
+                        <a href="?franco={{ display_books.next_page_number }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Next</a>
+                        <a href="?franco={{ display_books.paginator.num_pages }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Last</a>
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
     </div>
+    
 
     <!-- Smooth Create Modal -->
     <div id="create-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs opacity-0 pointer-events-none transition-all duration-300">
@@ -141,11 +156,6 @@
         </div>
     </div>
 
-    
     <!-- Referencing External JS File -->
-    <script src="{% static 'js/display_book.js' %}">
-        // External Modal Handler for Create / Add Forms
-
-
-    </script>
+    <script src="{% static 'js/display_book.js' %}"></script>
 {% endblock %}

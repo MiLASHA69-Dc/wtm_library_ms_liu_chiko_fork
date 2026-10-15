@@ -7,9 +7,9 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def display_genre(request):
-    all_genre = Genre.objects.all()#.order_by("-id")
+    all_genre = Genre.objects.all().order_by("-id")
     # paginate = Paginator(object_list, number of rows of your table)
-    paginate = Paginator(all_genre, 10)
+    paginate = Paginator(all_genre, 6)
     page_number = request.GET.get("page")
     page_obj = paginate.get_page(page_number)
     if request.method == "POST":

@@ -19,6 +19,22 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from debug_toolbar.toolbar import debug_toolbar_urls
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view  =  get_schema_view(
+    openapi.Info(
+        title="Yeukai Library API",
+        default_version="vAgnes",
+        description="Library OpenAPI for testing",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="liuyuenfu@gmail.com"),
+        license=openapi.License(name="Not so Free License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,)
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +43,8 @@ urlpatterns = [
     path("author/", include("author.urls")),
     path("book/", include("book_app.urls")),
     path("genre/", include("genre_app.urls")),
+    #OPENAPI
+    path("swagger<format>/",schema_view.without_ui(cache_timeout=0),name="schema_json"),
+    path("swagger/",schema_view.with_ui("swagger",cache_timeout=0),name="schema-swagger-ui"),
+    path("redoc",schema_view.with_ui("redoc",cache_timeout=0),name="schema-redoc")
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + debug_toolbar_urls()

@@ -52,7 +52,7 @@ def delete_book(request,book_id):
 
 def make_book_request(request):
     user = request.user
-    get_related_book_request = BookRequest.objects.filter(customer=user).select_related("book")
+    get_related_book_request = BookRequest.objects.filter(customer=user).order_by("-id").select_related("book")
     create_request_form= BookRequestForm()
     if request.method=="POST":
         create_request_form= BookRequestForm(request.POST)

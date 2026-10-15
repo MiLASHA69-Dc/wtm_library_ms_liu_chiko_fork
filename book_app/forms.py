@@ -63,7 +63,27 @@ class UpdateBookForm(forms.ModelForm):
             "author",
             "genre",
             "published_date",
+            "status"
         ]
+
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+        fields= [
+            "title","isbn","author","genre","status"
+        ]
+        for data in fields:
+            self.fields[data].widget.attrs.update(
+                {
+                    "type":"text", "name":"author", 
+                    "required class":"w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all"
+                }
+            )
+        self.fields['published_date'].widget=forms.DateInput(
+            {
+                "type":"date",
+                "class":"w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+            }
+        )
 
 
 class ChangeBookStatusForm(forms.ModelForm):
@@ -81,16 +101,26 @@ class BookRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["book"].queryset = Book.objects.filter(status="av")
+
+        self.fields["book"].widget.attrs.update(
+                        {
+                            "type":"text", "name":"author", 
+                            "required class":"w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all"
+                        }
+                    )
         date = ["book_date_request", "book_date_return"]
         for i in date:
-            self.fields[i].widget = forms.DateInput(
-                attrs={"type": "date", "format": "%Y-%m-%d"}
-            )
+            self.fields[i].widget=forms.DateInput(
+                        {
+                        "type":"date",
+                          "class":"w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                        }
+                    )
 
     def clean(self):
-
-        request_date = self.cleaned_data.get("book_date_request")
-        return_date = self.cleaned_data.get("book_date_return")
+        cleaned_data = super().clean()
+        request_date = cleaned_data.get("book_date_request")
+        return_date = cleaned_data.get("book_date_return")
         if request_date and return_date:
             if return_date < request_date:
                 raise forms.ValidationError(
@@ -100,7 +130,7 @@ class BookRequestForm(forms.ModelForm):
                         )
                     }
                 )
-        return request_date, return_date
+        return cleaned_data
         # self.fields["book_date_request"].widget=forms.DateInput(
         #         attrs={
         #             "type":"date",

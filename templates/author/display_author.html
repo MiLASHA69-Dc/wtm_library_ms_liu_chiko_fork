@@ -79,6 +79,39 @@
                 </table>
             </div>
         </div>
+        <!-- Modern Pagination Component Bar -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <!-- Record Count Info -->
+                <p class="text-xs text-slate-500">
+                    Showing <span class="font-semibold text-slate-700">{{ page_obj.start_index }}</span> to <span class="font-semibold text-slate-700">{{ page_obj.end_index }}</span> of <span class="font-semibold text-slate-700">{{ page_obj.paginator.count }}</span> records
+                </p>
+
+                <!-- Navigation Controls -->
+                <div class="flex items-center space-x-1.5">
+                    {% if page_obj.has_previous %}
+                        <a href="?pages=1" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">First</a>
+                        <a href="?pages={{ page_obj.previous_page_number }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Previous</a>
+                    {% endif %}
+
+                    <!-- Page Numbers -->
+                    <div class="hidden md:flex items-center space-x-1">
+                        {% for i in page_obj.paginator.page_range %}
+                            {% if page_obj.number == i %}
+                                <span class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow-2xs">{{ i }}</span>
+                            {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                <a href="?pages={{ i }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">{{ i }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if page_obj.has_next %}
+                        <a href="?pages={{ page_obj.next_page_number }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Next</a>
+                        <a href="?pages={{ page_obj.paginator.num_pages }}" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
     </div>
 
     <!-- Smooth Create Modal -->
@@ -118,29 +151,7 @@
         </div>
     </div>
 
-    
     <!-- Referencing External JS File -->
-    <script src="{% static 'js/display_book.js' %}">
-        // External Modal Handler for Create / Add Forms
-    </script>
+    <script src="{% static 'js/display_book.js' %}"></script>
 
-
-<div>
-    {% if page_obj.has_previous %}
-        <a href="?pages=1">First</a>
-        <a href="?pages={{page_obj.previous_page_number}}">Previous</a>
-    {% endif %}
-</div>
-<div>
-    {% for yeukai in page_obj.paginator.page_range %}
-    <a href="?pages={{yeukai}}">{{yeukai}}</a>
-      
-    {% endfor %}
-</div>
-<div>
-    {% if page_obj.has_next %}
-        <a href="?pages={{page_obj.paginator.num_pages}}">Last</a>
-        <a href="?pages={{page_obj.next_page_number}}">Next</a>
-    {% endif %}
-</div>
 {% endblock %}
