@@ -1596,3 +1596,229 @@ urlpatterns = [
     path("book/", include("book_app.urls")),
     path("genre/", include("genre_app.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + debug_toolbar_urls()
+
+
+# Part 2: Continuing the WTM Library Management System Development
+
+This guide picks up directly from your previous setup steps and walks through implementing the **Book Request Workflow**, **Static Assets & HTML Template Integration**, **Django REST Framework (DRF)**, and **OpenAPI/Swagger Documentation**.
+
+---
+
+## 📖 1. Book Request Model, Form, and View Implementation
+
+### A. Book Request Model (`book_app/models.py`)
+Add the `BookRequest` model to track book loans, linking customers (users) to books with request and return dates:
+
+```python
+class BookRequest(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book_date_request = models.DateField(blank=False, null=False)
+    book_date_return = models.DateField(blank=False, null=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Order #{self.id}"
+```
+
+### B. Book Request Form & Validation (`book_app/forms.py`)
+Create the form to handle book requests, filtering querysets for available books (`status="av"`) and adding cross-field validation for return dates:
+
+```python
+class BookRequestForm(forms.ModelForm):
+    class Meta:
+        model = BookRequest
+        fields = ["book", "book_date_request", "book_date_return"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["book"].queryset = Book.objects.filter(status="av")
+
+        self.fields["book"].widget.attrs.update(
+            {
+                "type": "text",
+                "name": "author",
+                "required class": "w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all",
+            }
+        )
+        date = ["book_date_request", "book_date_return"]
+        for i in date:
+            self.fields[i].widget = forms.DateInput(
+                {
+                    "type": "date",
+                    "class": "w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500",
+                }
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        request_date = cleaned_data.get("book_date_request")
+        return_date = cleaned_data.get("book_date_return")
+        if request_date and return_date:
+            if return_date < request_date:
+                raise forms.ValidationError(
+                    {
+                        "book_date_return": (
+                            "The return date can not be earlier than the request date"
+                        )
+                    }
+                )
+        return cleaned_data
+```
+
+### C. Book Request View (`book_app/views.py`)
+Implement the view to handle the request logic, update book statuses from available (`av`) to borrowed (`br`), and render the request page:
+
+```python
+@login_required
+def make_book_request(request):
+    user = request.user
+    get_related_book_request = BookRequest.objects.filter(customer=user).order_by("-id").select_related("book")
+    create_request_form = BookRequestForm()
+    if request.method == "POST":
+        create_request_form = BookRequestForm(request.POST)
+        if create_request_form.is_valid():
+            request_form = create_request_form.save(commit=False)
+            request_form.customer = user
+            book = request_form.book
+            print(f"DEBUG: Found book: {book.title}, current status: {book.status}")
+            
+            if book.status == "av":
+                book.status = 'br'
+                book.save(update_fields=["status", "updated_at"])
+            elif book.status == "br":
+                create_request_form.add_error(
+                    "book", "This book is not available"
+                )
+            request_form.save()
+            print(f"DEBUG: Book status updated to 'br' and request saved!")
+            return redirect("books_app:book_request")
+
+    context = {
+        "form": create_request_form,
+        "book_requested": get_related_book_request
+    }
+    return render(request, "book_request/book_request.html", context)
+```
+
+---
+
+## 🎨 2. Integrating HTML Templates & Static Assets
+
+Organize your static assets (`css`, `js`, `images`) inside the project root `static/` folder structure, and integrate templates into your Django app.
+
+```text
+library_ms/
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+└── templates/
+    ├── book/
+    └── book_request/
+```
+
+Load static files in templates using the standard template tag:
+```html
+{% load static %}
+```
+
+---
+
+## 🔌 3. Adding DRF and `drf-yasg` to the Project
+
+### A. Serializer (`book_app/serializers.py`)
+Create a serializer for the `Book` model to expose it via REST endpoints:
+
+```python
+from rest_framework import serializers
+from .models import Book
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = ["title", "isbn", "author", "genre", "published_date"]
+```
+
+### B. Serializer View (`book_app/serializer_views.py`)
+Create an API view using Django REST Framework decorators:
+
+```python
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.decorators import login_required
+from .serializers import BookSerializer
+from .models import Book
+
+@login_required
+@api_view(["GET"])
+def book(request):
+    all_book = Book.objects.all()
+    if request.method == "GET":
+        book_serializer = BookSerializer(all_book, many=True)
+        return Response(book_serializer.data, status=status.HTTP_200_OK)
+    return Response(book_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+```
+
+---
+
+## 🔗 4. URL Configuration for API & Book App
+
+### A. App-Level URL Routing (`book_app/urls.py`)
+Include your standard views and the new API endpoint:
+
+```python
+from django.urls import path
+from .views import display_books, update_book, delete_book, make_book_request
+from .serializer_views import book
+
+app_name = "books_app"
+urlpatterns = [
+    path("display-books/", display_books, name="display_books"),
+    path("update-book/<str:book_request>/", update_book, name="update_book"),
+    path("delete-book/<str:book_id>/", delete_book, name="delete_book"),
+    path("make-a-book-request/", make_book_request, name="book_request"),
+    path("book-api/", book, name="book_api"),
+]
+```
+
+### B. Root Project URL Configuration (`library_ms/urls.py`)
+Configure your root URL dispatchers along with `drf-yasg` Swagger and ReDoc documentation:
+
+```python
+from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Yeukai Library API",
+        default_version="v1",
+        description="Library OpenAPI for testing",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("home_app.urls")),
+    path("accounts/", include("accounts.urls")),
+    path("author/", include("author.urls")),
+    path("book/", include("book_app.urls")),
+    path("genre/", include("genre_app.urls")),
+    # Swagger and ReDoc API Documentation Endpoints
+    path("swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("redoc", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + debug_toolbar_urls()
+```
